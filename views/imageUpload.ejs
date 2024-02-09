@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/style.css">\
+	<link rel="stylesheet" href="../css/bootstrap.min.css">
+	<title>Image Uploading</title>
+</head>
+
+<body class="upload-art">
+	<div class="contact-form">
+		<div class="contact-image">
+			<img src="images/logo_upload.png" alt="rocket_contact"/>
+		</div>
+		<form method="post" action="/imageUpload" enctype="multipart/form-data">
+			<h3>Add your art here</h3>
+		   <div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<input type="text" name="name" class="form-control" size="20" placeholder="Your Name *" value="" />
+					</div>
+					<div class="col-md-6">
+					<div class="form-group art-description">
+						<textarea name="descp" class="form-control" placeholder="description *" style="width: 100%; height: 96px;" style="height: 96px;"></textarea>
+					</div>
+				</div>
+					<div class="form-group">
+						<input type="text" name="email" class="form-control" placeholder="Your Email *" value="" />
+					</div>
+			
+					<label class="custom-file-upload">
+						<input type="file" name="ProductImage"/>
+					</label>
+					<input class="btn-style upload-btn" type="submit" value="Upload Art" style="font-family: sans-serif; background-color: #967E76; width: 17rem;"/>
+				</div>
+				
+			</div>
+		</form>
+</div>
+</body>
+
+</html>
