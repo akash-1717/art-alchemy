@@ -22,7 +22,7 @@ app.use(express.static("public"));
     
 // mysql -h sql6.freemysqlhosting.net -P 3306 -u sql6683073 -p
 var db = mysql.createConnection({
-    host: "sql6.freemysqlhosting.net	",
+    host: "sql6.freemysqlhosting.net",
     user: "sql6683073",
     password: "4TM8UZGKSV",
     database: "sql6683073",
