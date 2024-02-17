@@ -4,7 +4,7 @@ steps:
 2. install dependencies
    **npm install**
 3. run the server
-   **node app.js**
+   **node app.js** or **nodemon app.js**
 
 
 to view the database on the command line:
