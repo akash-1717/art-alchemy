@@ -41,13 +41,12 @@ db.connect(function(err) {
     } else {
         console.log("Connected!");
         db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'sql6684724';`,(err,tables)=>{
-            console.log(tables[2].TABLE_NAME);
             for(var i=0;i<tables.length;i++){
-                if(tables[i].TABLE_NAME == "login_cred") flag1 = 1;
+                if(tables[i].table_name == "login_cred") flag1 = 1;
             }
         
 
-            if(flag1){
+            if(!flag1){
                 var sql = "CREATE TABLE login_cred (name varchar(30),email varchar(50),passwd text);"
                 db.query(sql,function(err,result){
                     if(err) console.log(err);
@@ -58,11 +57,11 @@ db.connect(function(err) {
             }
 
             for(var i=0;i<tables.length;i++){
-                if(tables[i].TABLE_NAME == "paintings") flag2 = 1;
+                if(tables[i].table_name == "paintings") flag2 = 1;
             }
  
 
-            if(flag2){
+            if(!flag2){
                 var sql = "CREATE TABLE paintings (id int primary key auto_increment,name varchar(250),imgpath text,imaghere longtext,descp longtext);";
                 db.query(sql,function(err,result){
                     if(err) console.log(err);
@@ -73,11 +72,11 @@ db.connect(function(err) {
             }
 
             for(var i=0;i<tables.length;i++){
-                if(tables[i].TABLE_NAME == "contact") flag3 = 1;
+                if(tables[i].table_name == "contact") flag3 = 1;
             }
 
 
-            if(flag3){
+            if(!flag3){
                 var sql = "CREATE TABLE contact (id int primary key auto_increment,name varchar(50),email varchar(60),message varchar(2000));"
                 db.query(sql,function(err,result){
                     if(err) console.log(err);
