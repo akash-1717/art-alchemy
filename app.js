@@ -20,12 +20,12 @@ app.use(express.static("public"));
     //     database: "paint"
     // });
     
-// mysql -h sql6.freemysqlhosting.net -P 3306 -u sql6683073 -p
+// mysql -h sql6.freemysqlhosting.net -P 3306 -u sql6684724 -p
 var db = mysql.createConnection({
-    host: "sql6.freemysqlhosting.net	",
-    user: "sql6683073",
-    password: "4TM8UZGKSV",
-    database: "sql6683073",
+    host: "sql6.freemysqlhosting.net",
+    user: "sql6684724",
+    password: "Swvr3ATZwI",
+    database: "sql6684724",
     port: 3306
 });
 
@@ -40,8 +40,8 @@ db.connect(function(err) {
         console.log(err);
     } else {
         console.log("Connected!");
-        db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'sql6683073';`,(err,tables)=>{
-            // console.log(tables[2].TABLE_NAME);
+        db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'sql6684724';`,(err,tables)=>{
+            console.log(tables[2].TABLE_NAME);
             for(var i=0;i<tables.length;i++){
                 if(tables[i].TABLE_NAME == "login_cred") flag1 = 1;
             }
