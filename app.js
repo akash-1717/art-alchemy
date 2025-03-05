@@ -1,8 +1,10 @@
-const mysql = require("mysql");
+const mysql2 = require("mysql2");
 const express = require("express");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const { resolveInclude } = require("ejs");
+// Add session requirement
+const session = require("express-session");
 
 const app = express();
 
@@ -12,97 +14,103 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
 
+// Add session configuration
+app.use(session({
+    secret: 'art-alchemy-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false, maxAge: 3600000 } // 1 hour
+}));
 
-// var db = mysql.createConnection({
-    //     host: "localhost",
-    //     user: "root",
-    //     password: "@Akash2002",
-    //     database: "paint"
-    // });
-    
-// mysql -h sql6.freemysqlhosting.net -P 3306 -u sql6684724 -p
-var db = mysql.createConnection({
-    host: "sql6.freemysqlhosting.net",
-    user: "sql6684724",
-    password: "Swvr3ATZwI",
-    database: "sql6684724",
-    port: 3306
+// Database connection
+var db = mysql2.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "newpassword",
+    database: "paint",
 });
 
+// Add middleware to make session available in all views
+app.use((req, res, next) => {
+    res.locals.user = req.session.user;
+    next();
+});
 
-var flag1=0;
-var flag2=0;
-var flag3=0;
-// connecting to databases
-
+// connecting to database
 db.connect(function(err) {
     if (err) {
         console.log(err);
     } else {
-        console.log("Connected!");
-        db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'sql6684724';`,(err,tables)=>{
-            for(var i=0;i<tables.length;i++){
-                if(tables[i].table_name == "login_cred") flag1 = 1;
-            }
+        console.log("Connected to database!");
         
-
-            if(!flag1){
-                var sql = "CREATE TABLE login_cred (name varchar(30),email varchar(50),passwd text);"
-                db.query(sql,function(err,result){
-                    if(err) console.log(err);
-                    else{
-                        console.log("LOGIN_CRED created");
+        // Use the correct database name in the query
+        db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'paint';`, (err, tables) => {
+            if (err) {
+                console.log("Error checking tables:", err);
+                return;
+            }
+            
+            // Convert tables to simple array for easier checking
+            const tableNames = tables.map(table => table.table_name || table.TABLE_NAME);
+            console.log("Existing tables:", tableNames);
+            
+            // Check if login_cred table exists
+            if (!tableNames.includes('login_cred')) {
+                var sql = "CREATE TABLE login_cred (name varchar(30), email varchar(50), passwd text);";
+                db.query(sql, function(err, result) {
+                    if (err) console.log(err);
+                    else {
+                        console.log("LOGIN_CRED table created");
                     }
                 });
+            } else {
+                console.log("LOGIN_CRED table already exists");
             }
 
-            for(var i=0;i<tables.length;i++){
-                if(tables[i].table_name == "paintings") flag2 = 1;
-            }
- 
-
-            if(!flag2){
-                var sql = "CREATE TABLE paintings (id int primary key auto_increment,name varchar(250),imgpath text,imaghere longtext,descp longtext);";
-                db.query(sql,function(err,result){
-                    if(err) console.log(err);
-                    else{
-                        console.log("PAINTINGS created");
+            // Check if paintings table exists
+            if (!tableNames.includes('paintings')) {
+                var sql = "CREATE TABLE paintings (id int primary key auto_increment, name varchar(250), imgpath text, imaghere longtext, descp longtext);";
+                db.query(sql, function(err, result) {
+                    if (err) console.log(err);
+                    else {
+                        console.log("PAINTINGS table created");
                     }
                 });
+            } else {
+                console.log("PAINTINGS table already exists");
             }
 
-            for(var i=0;i<tables.length;i++){
-                if(tables[i].table_name == "contact") flag3 = 1;
-            }
-
-
-            if(!flag3){
-                var sql = "CREATE TABLE contact (id int primary key auto_increment,name varchar(50),email varchar(60),message varchar(2000));"
-                db.query(sql,function(err,result){
-                    if(err) console.log(err);
-                    else{
+            // Check if contact table exists
+            if (!tableNames.includes('contact')) {
+                var sql = "CREATE TABLE contact (id int primary key auto_increment, name varchar(50), email varchar(60), message varchar(2000));";
+                db.query(sql, function(err, result) {
+                    if (err) console.log(err);
+                    else {
                         console.log("CONTACT table created");
                     }
                 });
+            } else {
+                console.log("CONTACT table already exists");
             }
         });
-     
     }
 });
 
-
-
 const upload = multer({storage:multer.memoryStorage()});
 
-
-
 app.get("/",(req,res)=>{
-    res.render('index');
+    res.render('index', { user: req.session.user });
 });
 
+// Update user route to check for session
 app.get("/user", (req, res) => {
-    res.render("index1")
-})
+    // Check if user is logged in
+    if (req.session.user) {
+        res.render("index1", { user: req.session.user });
+    } else {
+        res.redirect("/signin");
+    }
+});
 
 app.get("/paintings", (req,res)=>{
     const sql = "SELECT * FROM paintings;";
@@ -111,32 +119,46 @@ app.get("/paintings", (req,res)=>{
             res.send(err);
         }
         else{
-            res.render("paintings",{products:result});
+            res.render("paintings", {
+                products: result,
+                user: req.session.user
+            });
         }
     });
 });
 
+// Modify the imageUpload GET route to check login status
 app.get("/imageUpload",(req,res)=>{
-    res.render("imageUpload");
+    if (!req.session.user) {
+        return res.redirect("/signin");
+    }
+    res.render("imageUpload", { user: req.session.user });
 });
 
-app.post("/imageUpload",upload.single('ProductImage'),(req,res)=>{
+// Modify the imageUpload POST route to use the session user's name
+app.post("/imageUpload", upload.single('ProductImage'), (req,res) => {
+    if (!req.session.user) {
+        return res.redirect("/signin");
+    }
+    
     var image = req.file.buffer.toString('base64');
-     var name = req.body.name;
-     var descp = req.body.descp;
-     console.log(name);
-     const sql = "INSERT INTO paintings VALUES(NULL,?,NULL,?,?);"  //primary key,name,imagePath,imageHere,descp
-     db.query(sql,[name,image,descp],(err,result,fields)=>{
-         if(err) console.log(err);
-         else{
-             console.log("image added to database");
-             res.redirect("/paintings");
-         }
-     });
- });
+    // Use the name from the session instead of from the form
+    var name = req.session.user.name;
+    var descp = req.body.descp;
+    
+    console.log(name);
+    const sql = "INSERT INTO paintings VALUES(NULL,?,NULL,?,?);"  //primary key,name,imagePath,imageHere,descp
+    db.query(sql,[name,image,descp],(err,result,fields)=>{
+        if(err) console.log(err);
+        else{
+            console.log("image added to database");
+            res.redirect("/paintings");
+        }
+    });
+});
 
 app.get("/contact", (req,res)=>{
-    res.render("contact");
+    res.render("contact", { user: req.session.user });
 });
 
 app.post("/contact",(req,res)=>{
@@ -154,9 +176,14 @@ app.post("/contact",(req,res)=>{
 });
 
 app.get("/signin",(req,res)=>{
+    // If already logged in, redirect to user page
+    if (req.session.user) {
+        return res.redirect("/user");
+    }
     res.render('signin');
-})
+});
 
+// Update signin POST route to store user info in session
 app.post("/signin", (req, res) => {
     const name = req.body.nm;
     const password = req.body.pwd;
@@ -170,6 +197,11 @@ app.post("/signin", (req, res) => {
 
         // Check if any rows match the provided credentials
         if (results.length > 0) {
+            // Store user info in session
+            req.session.user = {
+                name: results[0].name,
+                email: results[0].email
+            };
             // Credentials are valid
             res.redirect('/user');
         } else {
@@ -179,19 +211,35 @@ app.post("/signin", (req, res) => {
     });
 });
 
+// Add logout functionality
+app.get("/logout", (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.log(err);
+        }
+        res.redirect("/");
+    });
+});
 
+// Update signup POST route to store user info in session after signup
 app.post("/signup", (req, res) => {
     const name = req.body.nm;
     const email = req.body.eml;
     const password = req.body.pwd;
-    if(req.body.signin == true)
-        res.redirect("/signin")
-    else {
+    
+    if(req.body.signin == true) {
+        res.redirect("/signin");
+    } else {
         const sql = "INSERT INTO login_cred values (?,?,?)";
         db.query(sql, [name,email,password], (err, result, fields) => {
             if(err) console.log(err);
             else {
                 console.log("signed up successfully");
+                // Store user info in session
+                req.session.user = {
+                    name: name,
+                    email: email
+                };
                 res.redirect("/user");
             }
         });
@@ -199,6 +247,10 @@ app.post("/signup", (req, res) => {
 });
 
 app.get("/signup", (req, res) => {
+    // If already logged in, redirect to user page
+    if (req.session.user) {
+        return res.redirect("/user");
+    }
     res.render("signup");
 });
 

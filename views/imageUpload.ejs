@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="css/style.css">\
+	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="../css/bootstrap.min.css">
 	<title>Image Uploading</title>
 </head>
@@ -16,29 +16,35 @@
 		</div>
 		<form method="post" action="/imageUpload" enctype="multipart/form-data">
 			<h3>Add your art here</h3>
-		   <div class="row">
+			<div class="row">
 				<div class="col-md-6">
+					<!-- Display the user name instead of input field -->
 					<div class="form-group">
-						<input type="text" name="name" class="form-control" size="20" placeholder="Your Name *" value="" />
+						<p class="user-info-display">Uploading as: <strong><%= user.name %></strong></p>
 					</div>
 					<div class="col-md-6">
-					<div class="form-group art-description">
-						<textarea name="descp" class="form-control" placeholder="description *" style="width: 100%; height: 96px;" style="height: 96px;"></textarea>
+						<div class="form-group art-description">
+							<textarea name="descp" class="form-control" placeholder="description *" style="width: 100%; height: 96px;"></textarea>
+						</div>
 					</div>
-				</div>
+					<!-- Keep email field if needed or remove it -->
 					<div class="form-group">
-						<input type="text" name="email" class="form-control" placeholder="Your Email *" value="" />
+						<input type="email" name="email" class="form-control" placeholder="Your Email *" value="<%= user.email %>" readonly />
 					</div>
 			
 					<label class="custom-file-upload">
-						<input type="file" name="ProductImage"/>
+						<input type="file" name="ProductImage" required/>
 					</label>
 					<input class="btn-style upload-btn" type="submit" value="Upload Art" style="font-family: sans-serif; background-color: #967E76; width: 17rem;"/>
 				</div>
-				
 			</div>
 		</form>
-</div>
+	</div>
+	
+	<!-- Add a back button -->
+	<div class="back-button-container">
+		<a href="/paintings" class="btn-style" style="font-family: sans-serif; background-color: #766e6a; width: 10rem;">Back to Paintings</a>
+	</div>
 </body>
 
 </html>

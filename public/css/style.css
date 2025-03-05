@@ -756,3 +756,35 @@ hr {
 }
 
 /* contact page styles ends here */
+
+/* Add these to your existing style.css file */
+
+.user-info-display {
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+}
+
+.user-info-display strong {
+  color: #967E76;
+}
+
+.back-button-container {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+/* Style for username in navbar */
+.menu li a.username {
+  font-weight: bold;
+  color: #967E76;
+}
+
+/* Make sure the logout button stands out */
+.menu li a.logout {
+  color: #dc3545;
+}

@@ -36,12 +36,13 @@
             <% } %>
         <% }) %>
       </ul>
-
     </div>
     
+    <!-- Only show 'Add Your Art' button if user is logged in -->
+    <% if (typeof user !== 'undefined' && user) { %>
       <a class="addyourart" href="/imageUpload">Add Your Art</a>
-   
-
-    
+    <% } else { %>
+      <a class="addyourart" href="/signin">Sign in to Add Your Art</a>
+    <% } %>
 </body>
 </html>
